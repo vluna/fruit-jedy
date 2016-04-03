@@ -1,0 +1,105 @@
+body {
+	margin: 0 auto;
+}
+
+#follower{
+  position : relative;
+  background-color : yellow;
+  width:15px;
+  height:15px;
+  border-radius:50px;
+}
+
+		.the-demo {
+			width: 960px;
+			margin: 0 auto;
+		}
+
+		.example-item {
+			float: left;
+			width: 25%;
+			padding-top: 325px;
+		}
+
+
+
+
+.lightsaber .plasma {
+	transition: height 300ms,;
+	-moz-transition: height 300ms;
+	-webkit-transition: height 300ms;
+	-o-transition: height 300ms;
+	-ms-transition: height 300ms;
+	border-radius: 12px 12px 0 0;
+	position: absolute;
+	bottom: 55px;
+	left: 2px;
+	width: 10px;
+	display: block;
+	filter: blur(1px);
+	-moz-filter: blur(1px);
+	-webkit-filter: blur(1px);
+	-o-filter: blur(1px);
+	-ms-filter: blur(1px);
+	height: 250px;
+}
+
+.yoda {
+	background: rgb(135,220,90); /* Old browsers */
+	background: linear-gradient(to right, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* W3C */
+	background: -moz-linear-gradient(left, rgb(135,220,90) 0%, rgb(254,254,254) 30%, rgb(254,254,254) 50%, rgb(254,254,254) 70%, rgb(135,220,90) 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgb(135,220,90)), color-stop(30%,rgb(254,254,254)), color-stop(50%,rgb(254,254,254)), color-stop(70%,rgb(254,254,254)), color-stop(100%,rgb(135,220,90))); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(left, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(left, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(left, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* IE10+ */
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#87dc5a', endColorstr='#87dc5a',GradientType=1 ); /* IE6-9 */
+	animation-name: yoda;
+	-moz-animation-name: yoda;
+	-webkit-animation-name: yoda;
+	-o-animation-name: yoda;
+	-ms-animation-name: yoda;
+	animation-duration: 2s;
+	-moz-animation-duration: 2s;
+	-webkit-animation-duration: 2s;
+	-o-animation-duration: 2s;
+	-ms-animation-duration: 2s;
+	animation-iteration-count: infinite;
+	-moz-animation-iteration-count: infinite;
+	-webkit-animation-iteration-count: infinite;
+	-o-animation-iteration-count: infinite;
+	-ms-animation-iteration-count: infinite;
+}
+
+div {
+	-webkit-transform : translateZ(0); 
+	-o-transform : translateZ(0); 
+	-moz-transform : translateZ(0); 
+	transform : translateZ(0); 
+}
+
+/* Animations */
+@keyframes yoda {
+	from { box-shadow: 0 0 10px #7EC855; }
+	50% { box-shadow: 0 0 16px #7EC855; }
+	to { box-shadow: 0 0 10px #7EC855; }
+}
+@-moz-keyframes yoda {
+	from { box-shadow: 0 0 10px #7EC855; }
+	50% { box-shadow: 0 0 16px #7EC855; }
+	to { box-shadow: 0 0 10px #7EC855; }
+}
+@-webkit-keyframes yoda {
+	from { box-shadow: 0 0 10px #7EC855; }
+	50% { box-shadow: 0 0 16px #7EC855; }
+	to { box-shadow: 0 0 10px #7EC855; }
+}
+@-o-keyframes yoda {
+	from { box-shadow: 0 0 10px #7EC855; }
+	50% { box-shadow: 0 0 16px #7EC855; }
+	to { box-shadow: 0 0 10px #7EC855; }
+}
+@-ms-keyframes yoda {
+	from { box-shadow: 0 0 10px #7EC855; }
+	50% { box-shadow: 0 0 16px #7EC855; }
+	to { box-shadow: 0 0 10px #7EC855; }
+}
