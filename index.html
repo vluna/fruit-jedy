@@ -77,8 +77,8 @@
       socket.on('jedy', function (data) {
           
           // Get values from the accelerometer
-          x = (data.x * 100) + widthCenter;
-          y = data.y * 100;
+          x = (data.x);// * 100) + widthCenter;
+          y = data.y;// * 100;
           z = data.z;
           pitch = data.pitch;
           roll = data.roll;
@@ -91,6 +91,10 @@
         posY = Math.min(y, limitY);
         console.log(posX);
       });
+
+       posX = Math.min(x, limitX);
+       posY = Math.min(y, limitY);
+
     var camera, scene, renderer;
     var raycaster, intersects, INTERSECTED;
     var effect, controls;
@@ -221,6 +225,7 @@
       
       // lightSaber
       var geometry = new THREE.BoxGeometry( 1,15,1 );
+      geometry.translate( 0, 7.5, 0 );
       var material = new THREE.MeshBasicMaterial( {color: 'blue'} );
       lightSaber = new THREE.Mesh( geometry, material );
       lightSaber.position.set(10,10,0);
@@ -271,8 +276,9 @@
           fire();
            
         }
-        lightSaber.rotation.x = posX;
-        console.log(posX)
+
+        lightSaber.rotation.x = pitch/100 * -1;
+        lightSaber.rotation.z = roll/20;
       
       
     }
@@ -303,13 +309,8 @@
 					INTERSECTED = null;
 
                 }
-    
-                
-
     }
     
-  
-
     function animate(t) {
       requestAnimationFrame(animate);
 

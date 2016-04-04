@@ -16,13 +16,13 @@ app.get('/', function(req, res,next) {
 });
 
 // Start on local server
-server.listen(8000);  
+server.listen(8000, "0.0.0.0");  
 
 var board = new five.Board(); // Connect to arduino board
 
 // Sensors
 var accelerometer;
-
+var force_sensor;
 // Outputs
 var acc_output;
 
@@ -30,6 +30,11 @@ var acc_output;
 board.on("ready", function() {
     accelerometer = new five.Accelerometer({
         controller: "ADXL345"
+    });
+
+    force_sensor = new five.Sensor({
+        pin: "A1",
+        freq: 25
     });
 });
 
@@ -52,9 +57,15 @@ io.sockets.on('connection', function (socket) {
                      }
 
             // Debug
-            // console.log(acc_output); 
+             console.log(acc_output); 
             // console.log("Sending...");    
             socket.emit('jedy', acc_output); // Send information to client
+        });
+
+        // Scale the sensor's value to the LED's brightness range
+        force_sensor.scale([0, 255]).on("data", function() {
+            // Debug
+            // console.log("Force: " + this.scaled);
         });
     }
 });
