@@ -1,181 +1,397 @@
-<!doctype html>
-<html>
-    <head>
-        <title>Fruit Jedy</title>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>IAT320 Jedi Academy Simulator</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <style>
+      body {
+        margin: 0px;
+        overflow: hidden;
+      }
+      #JediSimulator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="JediSimulator"></div>
+
+  <script src="js/third-party/threejs/three.js"></script>
+  <script src="js/third-party/threejs/StereoEffect.js"></script>
+  <script src="js/third-party/threejs/DeviceOrientationControls.js"></script>
+  <script src="js/third-party/threejs/OrbitControls.js"></script>
+  <script src="js/third-party/threejs/Raycaster.js"></script>
+    <script src="js/renderers/Projector.js"></script>
+    <script src="js/renderers/CanvasRenderer.js"></script>
+    <script src="js/libs/stats.min.js"></script>
+    <script src="js/libs/tween.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+
+        // follower = $(".plasma"); // css variable stored
+
+        // // Modify css properties of the lightsaber
+        //   follower.css({ 
+        //     left: posX, 
+        //     top: posY, 
+        //     WebkitTransform: 'rotate(' + roll + 'deg)', 
+        //     '-moz-transform': 'rotate(' + roll + 'deg)', 
+        //     'transform': 'rotate(' + roll + 'deg)'
+        //   });
+        // });
+    </script>
+  <script type="text/javascript">
+
+      // Values from the accelerometer
+      var x;
+      var y;
+      var z;
+      var pitch;
+      var roll;
+      var inclination;
+      var orientation;
+      var acceleration;
+
+      // Mapped values from accelerometer
+      var posX;
+      var posY;
+
+      // Screen values for better mapping
+      var limitX = window.innerWidth;
+      var limitY = window.innerHeight;
+      var widthCenter = window.innerWidth/2;
+      var heightCenter = window.innerHeight/2;
+      
+      // Other variables
+      var follower; // css tag
+      var socket; // Comomunication with the server
+      
+      // Start server
+      socket = io('http://localhost:8000');
+      socket.on('jedy', function (data) {
+          
+          // Get values from the accelerometer
+          x = (data.x * 100) + widthCenter;
+          y = data.y * 100;
+          z = data.z;
+          pitch = data.pitch;
+          roll = data.roll;
+          inclination = data.inclination;
+          orientation = data.orientation;
+          acceleration = data.acceleration;
+          
+          // Set limitation for the movement of the lightsabes
+        posX = Math.min(x, limitX);
+        posY = Math.min(y, limitY);
+        console.log(posX);
+      });
+    var camera, scene, renderer;
+    var raycaster, intersects, INTERSECTED;
+    var effect, controls;
+    var element, container;
+    var floorMesh;
+   
+    var lightSaber, lsMaterial, lsMesh;   
+    var boxButton, bButtons = [];
+    
+    var stArmy = [], stormTrooper, stMaterial, stMesh, laser,stPosX, stPosY, stPosZ;
+
+    var clock = new THREE.Clock();
+    
+    var rSwing = false, highlighted = false, simulate = false, simulating = false;
+
+    init();
+    animate();
+
+    function init() {
+      renderer = new THREE.WebGLRenderer();
+      element = renderer.domElement;
+      container = document.getElementById('JediSimulator');
+      container.appendChild(element);
+
+      effect = new THREE.StereoEffect(renderer); // This makes two sreens of the renderer
+
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(90, 1, 0.001, 700);
+      camera.position.set(0, 20, 0);
+      scene.add(camera);
+
+      controls = new THREE.OrbitControls(camera, element);
+      controls.rotateUp(Math.PI / 4);
+      controls.target.set(
+        camera.position.x + 0.1,
+        camera.position.y,
+        camera.position.z
+      );
+      controls.noZoom = true;
+      controls.noPan = true;
+      
+
+    var radius   = 10,
+    segments = 64,
+    material = new THREE.LineBasicMaterial( { color: 0x0000ff } ),
+    geometry = new THREE.CircleGeometry( radius, segments );
 
 
-        <link rel="stylesheet" type="text/css" href="css/main.css">
-    </head>
-    <style type="text/css">
-    body {
-	margin: 0 auto;
-}
-
-#follower{
-  position : relative;
-  background-color : yellow;
-  width:15px;
-  height:15px;
-  border-radius:50px;
-}
-
-		.the-demo {
-			width: 960px;
-			margin: 0 auto;
-		}
-
-		.example-item {
-			float: left;
-			width: 25%;
-			padding-top: 325px;
-		}
+    // create a box button
+   var geometryBox = new THREE.BoxGeometry( 5, 5, 15 );
+   var materialBox = new THREE.MeshBasicMaterial( {color:'red'} );
+	    
+        boxButton = new THREE.Mesh( geometryBox, materialBox );
+        boxButton.position.set(30,20,0);
+        boxButton.name = 'StartButton';
+        
+        scene.add(boxButton);
+        bButtons.push(boxButton);
 
 
+      function setOrientationControls(e) {
+        if (!e.alpha) {
+          return;
+        }
 
+        controls = new THREE.DeviceOrientationControls(camera, true);
+        controls.connect();
+        controls.update();
 
-.lightsaber .plasma {
-	transition: height 300ms,;
-	-moz-transition: height 300ms;
-	-webkit-transition: height 300ms;
-	-o-transition: height 300ms;
-	-ms-transition: height 300ms;
-	border-radius: 12px 12px 0 0;
-	position: absolute;
-	bottom: 55px;
-	left: 2px;
-	width: 10px;
-	display: block;
-	filter: blur(1px);
-	-moz-filter: blur(1px);
-	-webkit-filter: blur(1px);
-	-o-filter: blur(1px);
-	-ms-filter: blur(1px);
-	height: 250px;
-}
+        element.addEventListener('click', fullscreen, false);
 
-.yoda {
-	background: rgb(135,220,90); /* Old browsers */
-	background: linear-gradient(to right, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* W3C */
-	background: -moz-linear-gradient(left, rgb(135,220,90) 0%, rgb(254,254,254) 30%, rgb(254,254,254) 50%, rgb(254,254,254) 70%, rgb(135,220,90) 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgb(135,220,90)), color-stop(30%,rgb(254,254,254)), color-stop(50%,rgb(254,254,254)), color-stop(70%,rgb(254,254,254)), color-stop(100%,rgb(135,220,90))); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(left, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(left, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(left, rgb(135,220,90) 0%,rgb(254,254,254) 30%,rgb(254,254,254) 50%,rgb(254,254,254) 70%,rgb(135,220,90) 100%); /* IE10+ */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#87dc5a', endColorstr='#87dc5a',GradientType=1 ); /* IE6-9 */
-	animation-name: yoda;
-	-moz-animation-name: yoda;
-	-webkit-animation-name: yoda;
-	-o-animation-name: yoda;
-	-ms-animation-name: yoda;
-	animation-duration: 2s;
-	-moz-animation-duration: 2s;
-	-webkit-animation-duration: 2s;
-	-o-animation-duration: 2s;
-	-ms-animation-duration: 2s;
-	animation-iteration-count: infinite;
-	-moz-animation-iteration-count: infinite;
-	-webkit-animation-iteration-count: infinite;
-	-o-animation-iteration-count: infinite;
-	-ms-animation-iteration-count: infinite;
-}
+        window.removeEventListener('deviceorientation', setOrientationControls, true);
+      }
+      window.addEventListener('deviceorientation', setOrientationControls, true);
 
-div {
-	-webkit-transform : translateZ(0); 
-	-o-transform : translateZ(0); 
-	-moz-transform : translateZ(0); 
-	transform : translateZ(0); 
-}
+      var light = new THREE.HemisphereLight(0x777777, 0x000000, 0.6);
+      scene.add(light);
 
-/* Animations */
-@keyframes yoda {
-	from { box-shadow: 0 0 10px #7EC855; }
-	50% { box-shadow: 0 0 16px #7EC855; }
-	to { box-shadow: 0 0 10px #7EC855; }
-}
-@-moz-keyframes yoda {
-	from { box-shadow: 0 0 10px #7EC855; }
-	50% { box-shadow: 0 0 16px #7EC855; }
-	to { box-shadow: 0 0 10px #7EC855; }
-}
-@-webkit-keyframes yoda {
-	from { box-shadow: 0 0 10px #7EC855; }
-	50% { box-shadow: 0 0 16px #7EC855; }
-	to { box-shadow: 0 0 10px #7EC855; }
-}
-@-o-keyframes yoda {
-	from { box-shadow: 0 0 10px #7EC855; }
-	50% { box-shadow: 0 0 16px #7EC855; }
-	to { box-shadow: 0 0 10px #7EC855; }
-}
-@-ms-keyframes yoda {
-	from { box-shadow: 0 0 10px #7EC855; }
-	50% { box-shadow: 0 0 16px #7EC855; }
-	to { box-shadow: 0 0 10px #7EC855; }
-}
-	</style>
-    <body>
-		<div class="example-item">
-			<div class="lightsaber">
-				<div class="plasma yoda"></div>
-			</div>
-		</div>
+      var texture = THREE.ImageUtils.loadTexture(
+        'img/spaceshiptexture1.png'
+      );
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.anisotropy = renderer.getMaxAnisotropy();
 
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-		<script src="/socket.io/socket.io.js"></script>
-		<script>
-			// Values from the accelerometer
-			var x;
-			var y;
-			var z;
-			var pitch;
-			var roll;
-			var inclination;
-			var orientation;
-			var acceleration;
+      var material = new THREE.MeshPhongMaterial({
+        color: 0xffffff,
+        specular: 0xffffff,
+        shininess: 20,
+        map: texture
+      });
 
-			// Mapped values from accelerometer
-			var posX;
-			var posY;
+      var geometry = new THREE.PlaneGeometry(2000, 2000);
 
-			// Screen values for better mapping
-			var limitX = window.innerWidth;
-			var limitY = window.innerHeight;
-			var widthCenter = window.innerWidth/2;
-			var heightCenter = window.innerHeight/2;
-			
-			// Other variables
-			var follower; // css tag
-			var socket; // Comomunication with the server
-			
-			// Start server
-			socket = io('http://localhost:8000');
-			socket.on('jedy', function (data) {
-	    		
-	    		// Get values from the accelerometer
-	    		x = (data.x * 100) + widthCenter;
-	    		y = data.y * 100;
-	    		z = data.z;
-	    		pitch = data.pitch;
-	    		roll = data.roll;
-	    		inclination = data.inclination;
-	    		orientation = data.orientation;
-	    		acceleration = data.acceleration;
-	    		
-	    		// Set limitation for the movement of the lightsabes
-				posX = Math.min(x, limitX);
-				posY = Math.min(y, limitY);
+      floorMesh = new THREE.Mesh(geometry, material);
+      floorMesh.rotation.x = -Math.PI / 2;
+      floorMesh.name = 'Floor';
+      scene.add(floorMesh);
+      
+      // Storm Trooper
+      var stGeometry = new THREE.PlaneGeometry(30,50);
+      
+      // Textures
+      var stTexture = new THREE.TextureLoader().load('img/Stormtrooper_withgun2.png');
+      var stTexture2 = new THREE.TextureLoader().load('img/Stormtrooper_notaiming2.png');
+      
+      var stMaterial = new THREE.MeshPhongMaterial({
+        map: stTexture2,
+        transparent: true
+      });
+      
+      
+    //   for(var k=0; k<2;k++){
+      
+      stMesh = new THREE.Mesh(stGeometry, stMaterial);
+      stMesh.rotation.y = 180;
+      stMesh.position.set(50,20,30);
+      // scene.add(stMesh);
+    //   }
+      // create lasers
+      var geometry = new THREE.BoxGeometry( 6,1,1 );
+      var material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
+      laser = new THREE.Mesh( geometry, material );
+      laser.rotation.y = -Math.PI/6;
+      laser.rotation.x = -Math.PI/4;
+      laser.position.set(45,35,25);
+      
+      // lightSaber
+      var geometry = new THREE.BoxGeometry( 1,15,1 );
+      var material = new THREE.MeshBasicMaterial( {color: 'blue'} );
+      lightSaber = new THREE.Mesh( geometry, material );
+      lightSaber.position.set(10,10,0);
+      scene.add(lightSaber);
+        
+      window.addEventListener('resize', resize, false);
+      setTimeout(resize, 1);
+      
+      // add mouse events. Should I have a mouse up event?
+      window.addEventListener('mousedown',onDocumentMouseDown, false);    
+      
+    }
 
-				follower = $(".plasma"); // css variable stored
+    function resize() {
+      var width = container.offsetWidth;
+      var height = container.offsetHeight;
 
-				// Modify css properties of the lightsaber
-    			follower.css({ 
-    				left: posX, 
-    				top: posY, 
-    				WebkitTransform: 'rotate(' + roll + 'deg)', 
-    				'-moz-transform': 'rotate(' + roll + 'deg)', 
-    				'transform': 'rotate(' + roll + 'deg)'
-    			});
-	    	});
-		</script>
-	</body>
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(width, height);
+      effect.setSize(width, height);
+      
+      
+    }
+
+    function update(dt) {
+      resize();
+
+      camera.updateProjectionMatrix();
+      
+      controls.update(dt);
+      
+      // Do lightSaber rotation here
+    //   lightSaber.rotation.x +=1;
+      
+      if(highlighted == true && rSwing == true){
+          console.log('uhuh');
+          scene.remove(boxButton);
+          simulate = true; 
+        }
+        
+      // Initiate the simulation
+      if(simulate){
+          simulator();   
+      }
+      if(simulating){
+          fire();
+           
+        }
+        lightSaber.rotation.x = posX;
+        console.log(posX)
+      
+      
+    }
+
+    function render(dt) {
+      effect.render(scene, camera);
+      
+      raycaster = new THREE.Raycaster();
+      raycaster.set(camera.getWorldPosition(), camera.getWorldDirection() );
+    
+      intersects = raycaster.intersectObjects( bButtons );
+      
+      if ( intersects.length > 0 ) {
+          if ( INTERSECTED != intersects[ 0 ].object ) {
+              // if intersect then green
+              boxButton.material.color.setHex( '0x00ff00' );
+              highlighted = true;
+						if ( INTERSECTED ) {
+                            console.log(intersects[0].object.name);
+                            
+                        }
+					}
+				} else {
+                    // if not intersect then change to original color
+                    boxButton.material.color.setHex( '0xff0000' );
+                    highlighted = false;
+					if ( INTERSECTED ) 
+					INTERSECTED = null;
+
+                }
+    
+                
+
+    }
+    
+  
+
+    function animate(t) {
+      requestAnimationFrame(animate);
+
+      update(clock.getDelta());
+      render(clock.getDelta());
+    }
+
+    function fullscreen() {
+      if (container.requestFullscreen) {
+        container.requestFullscreen();
+      } else if (container.msRequestFullscreen) {
+        container.msRequestFullscreen();
+      } else if (container.mozRequestFullScreen) {
+        container.mozRequestFullScreen();
+      } else if (container.webkitRequestFullscreen) {
+        container.webkitRequestFullscreen();
+      }
+    }
+    
+    // Returns a random integer between min (included) and max (excluded)
+    // Using Math.round() will give you a non-uniform distribution!
+    function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min)) + min;
+    }
+    
+    function onDocumentMouseDown(event) 
+    {
+        
+        mouseDown = true;
+        event.preventDefault();
+        
+        switch ( event.button ) {
+        case 0: // left 
+            console.log('huh1');
+            break;
+        case 1: // middle
+            console.log('what');
+            break;
+        case 2: // right
+            console.log('huh');
+            // lightSaber
+            // lightSaber.rotation.x += posX;
+            rSwing = true;
+            break;
+        }
+       
+    }
+    
+    function simulator() {
+        /* This is the simlation
+            - Remove the boxButton
+            - Timer for 2mins
+            - Move the plane 
+            - Create storm troopers
+            - track results        
+        */
+        
+        floorMesh.position.x -= .1;
+        
+        scene.add(stMesh);
+        
+        
+        scene.add( laser );
+        stMesh.position.x-=.1;
+        // This will update objects that are created during in the simulation
+        simulating = true;
+        
+    }
+    
+    function fire(){
+       
+          laser.position.z-=.25;
+          laser.position.x-=.5;
+          laser.position.y-=.2;
+          console.log(laser.position.x);
+           
+            
+            
+            
+        
+    }
+    
+  </script>
+  </body>
 </html>

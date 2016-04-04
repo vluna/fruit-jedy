@@ -1,9 +1,22 @@
 // Dependencies
 var five = require("johnny-five");
-var app = require('http').createServer(handler)
-var io = require('socket.io')(app);
 var fs = require('fs');
 var path = require("path");
+var express = require('express');  
+var app = express();  
+var server = require('http').createServer(app);  
+var io = require('socket.io')(server);
+
+// Get all the files 
+app.use(express.static(__dirname + '/public'));  
+
+// Get the html to render
+app.get('/', function(req, res,next) {  
+    res.sendFile(__dirname + '/index.html');
+});
+
+// Start on local server
+server.listen(8000);  
 
 var board = new five.Board(); // Connect to arduino board
 
@@ -12,21 +25,6 @@ var accelerometer;
 
 // Outputs
 var acc_output;
-
-// Start on local server
-app.listen(8000);
-
-function handler (req, res) {
-    fs.readFile(__dirname + '/index.html', function (err, data) {
-        if (err) {
-            res.writeHead(500);
-            return res.end('Error loading index.html');
-        }
-
-        res.writeHead(200);
-        res.end(data);
-    });
-}
 
 // Set up the board
 board.on("ready", function() {
@@ -54,9 +52,9 @@ io.sockets.on('connection', function (socket) {
                      }
 
             // Debug
-            console.log(acc_output); 
+            // console.log(acc_output); 
             // console.log("Sending...");    
-            socket.emit('news', acc_output); // Send information to client
+            socket.emit('jedy', acc_output); // Send information to client
         });
     }
 });
