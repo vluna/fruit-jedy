@@ -111,7 +111,8 @@ div {
 	from { box-shadow: 0 0 10px #7EC855; }
 	50% { box-shadow: 0 0 16px #7EC855; }
 	to { box-shadow: 0 0 10px #7EC855; }
-}</style>
+}
+	</style>
     <body>
 		<div class="example-item">
 			<div class="lightsaber">
@@ -122,6 +123,7 @@ div {
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 		<script src="/socket.io/socket.io.js"></script>
 		<script>
+			// Values from the accelerometer
 			var x;
 			var y;
 			var z;
@@ -131,21 +133,25 @@ div {
 			var orientation;
 			var acceleration;
 
+			// Mapped values from accelerometer
 			var posX;
 			var posY;
 
+			// Screen values for better mapping
 			var limitX = window.innerWidth;
 			var limitY = window.innerHeight;
-
 			var widthCenter = window.innerWidth/2;
 			var heightCenter = window.innerHeight/2;
 			
-			var follower;
-			var socket;
+			// Other variables
+			var follower; // css tag
+			var socket; // Comomunication with the server
 			
+			// Start server
 			socket = io('http://localhost:8000');
-			socket.on('news', function (data) {
-	    
+			socket.on('jedy', function (data) {
+	    		
+	    		// Get values from the accelerometer
 	    		x = (data.x * 100) + widthCenter;
 	    		y = data.y * 100;
 	    		z = data.z;
@@ -155,22 +161,20 @@ div {
 	    		orientation = data.orientation;
 	    		acceleration = data.acceleration;
 	    		
-
-
+	    		// Set limitation for the movement of the lightsabes
 				posX = Math.min(x, limitX);
 				posY = Math.min(y, limitY);
 
+				follower = $(".plasma"); // css variable stored
 
-				follower = $(".plasma");
-
+				// Modify css properties of the lightsaber
     			follower.css({ 
     				left: posX, 
     				top: posY, 
-    				WebkitTransform: 'rotate(' + inclination + 'deg)', 
-    				'-moz-transform': 'rotate(' + inclination + 'deg)', 
-    				'transform': 'rotate(' + inclination + 'deg)'
+    				WebkitTransform: 'rotate(' + roll + 'deg)', 
+    				'-moz-transform': 'rotate(' + roll + 'deg)', 
+    				'transform': 'rotate(' + roll + 'deg)'
     			});
-
 	    	});
 		</script>
 	</body>

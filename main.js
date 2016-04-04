@@ -54,7 +54,7 @@ io.sockets.on('connection', function (socket) {
                      }
 
             // Debug
-            // console.log(acc_output); 
+            console.log(acc_output); 
             // console.log("Sending...");    
             socket.emit('news', acc_output); // Send information to client
         });
